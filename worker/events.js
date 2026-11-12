@@ -63,8 +63,21 @@ async function saveEvent(env, id, brief, { create }) {
   await env.ASSETS.delete(FILES.map((f) => rkey(id, f.name)));
 }
 
+// Requests for the same file that arrive together (the poster PNG is also needed for the PDF)
+// share one render instead of each doing the work.
+const inflight = new Map();
+
 /** Return { body, type } for one generated file, rendering and caching it on first use. */
-export async function getFile(env, id, name, { origin, render, brand }) {
+export function getFile(env, id, name, ctx) {
+  const key = `${id}/${name}`;
+  if (!inflight.has(key)) {
+    const p = makeFile(env, id, name, ctx).finally(() => inflight.delete(key));
+    inflight.set(key, p);
+  }
+  return inflight.get(key);
+}
+
+async function makeFile(env, id, name, { origin, render, brand }) {
   const spec = FILE_BY_NAME[name];
   if (!spec) return null;
   const hit = await env.ASSETS.get(rkey(id, name));

@@ -19,7 +19,19 @@ const FONTS = [poppinsRegular, poppinsMedium, poppinsBold, interRegular, interBo
 let ready;
 const init = () => (ready ??= initWasm(resvgWasm));
 
-export async function png(svg, { scale = 1 } = {}) {
+// One render at a time per Worker instance. The assets page asks for every preview at once and a
+// single instance has about 128 MB, so overlapping poster/banner renders can blow the limit
+// (Cloudflare error 1102). Queued requests simply wait their turn.
+let queue = Promise.resolve();
+const one = (job) => {
+  const run = queue.then(job, job);
+  queue = run.catch(() => {});
+  return run;
+};
+
+export const png = (svg, opts) => one(() => rasterise(svg, opts));
+
+async function rasterise(svg, { scale = 1 } = {}) {
   await init();
   const r = new Resvg(svg, {
     fitTo: scale === 1 ? { mode: 'original' } : { mode: 'zoom', value: scale },
@@ -33,4 +45,4 @@ export async function png(svg, { scale = 1 } = {}) {
   }
 }
 
-export const pdf = pngToPdf;
+export const pdf = (bytes, opts) => one(() => pngToPdf(bytes, opts));
