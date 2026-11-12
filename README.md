@@ -65,11 +65,27 @@ Needs `rsvg-convert` for the PDF.
 - **Reporting:** `/api/campaigns/:id/report.md?days=7` returns a paste-ready weekly summary with change vs the previous period; `daily.csv` for spreadsheets.
 - **Security:** admin routes fail closed (no `ADMIN_TOKEN` = everything denied), the session cookie holds a hash rather than the token, constant-time comparison, strict CSP with per-response nonces, all dynamic output HTML-escaped.
 
+## Create events from the admin site
+
+Signed in to the dashboard, **New event** takes the same details as a brief (title, category, date, time, location, button text, destination link, colour, theme, illustration, up to three highlights, QR caption) and does the rest:
+
+1. Checks the input and runs the brand linter on all five formats *before* saving, so a title that cannot fit is caught up front.
+2. Saves the event, creates one tracked short link per asset in D1, and stores the brief in R2.
+3. Draws each asset the first time it is opened (SVG to PNG with `resvg` WebAssembly and the bundled brand fonts) and caches it in R2. The **Assets** page shows previews and downloads for the Instagram post and story, the 11 x 17 poster (PNG and print PDF), the slide and the screen banner.
+4. **Edit details** regenerates everything. Link codes never change, so printed posters keep working.
+
+Notes:
+- The print PDF is image-based: the poster is rendered at 200 dpi (2200 x 3400) and placed on an 11 x 17 in page. It prints sharply, but the text is not selectable. The CLI still writes a vector PDF.
+- Rendering is CPU-heavy, so it needs the **Workers Paid** plan (the free plan caps CPU at 10 ms per request). Redirects stay cheap: the renderer is only loaded when an asset is generated.
+- Fonts (Poppins, Inter; SIL Open Font License) are subsetted to Latin and live in `worker/fonts/`.
+
 ## Deploy the tracking Worker
 
 ```bash
 npx wrangler d1 create eventpromoter                       # paste database_id into worker/wrangler.toml
 npx wrangler d1 execute eventpromoter --remote --file=worker/schema.sql
+npx wrangler r2 bucket create eventpromoter-assets          # generated assets + saved briefs
+npm install                                                 # resvg-wasm and pdf-lib for the Worker
 npx wrangler secret put ADMIN_TOKEN --config worker/wrangler.toml
 npm run deploy:worker
 
@@ -80,17 +96,17 @@ npx wrangler d1 execute eventpromoter --remote --file=out/kickoff/links.sql
 
 The CLI saves each campaign's link codes in `links/<campaign>.json` and **reuses them on every re-run**, so a poster that is already printed never changes link. Commit that folder in your own deployment (it is git-ignored here because the examples use a fake domain).
 
-**Status:** the Worker's logic is tested end to end against SQLite standing in for D1 (`npm test`, including CLI → `links.sql` → database → redirect). `wrangler deploy` itself has not been run against a real Cloudflare account yet.
+**Status:** the Worker's logic is tested end to end against SQLite standing in for D1 and a Map standing in for R2 (`npm test`, including CLI → `links.sql` → database → redirect, and form → saved event → rendered PNG / PDF). In those tests `sharp` draws the PNGs. The Worker's own renderer (`worker/render.js`, resvg-wasm with the bundled fonts) has not been run on a real deployment yet, so check the first generated assets against the CLI output (small differences in text rendering are possible).
 
 ## Project layout
 
 ```
-src/        layout engine, templates, artwork + icons, linter, QR encoder, link helpers, stats queries, CLI
-worker/     Cloudflare Worker, D1 schema, admin dashboard renderer
+src/        layout engine, templates, artwork + icons, linter, QR encoder, brief validation, PDF, link helpers, stats queries, CLI
+worker/     Cloudflare Worker, D1 schema, admin dashboard + event form, asset renderer, bundled fonts
 brand/      brand.json (palette, fonts, copy limits)
 examples/   sample briefs (+ one deliberately off-brand)
 tools/      font-metrics generator, QR verifier, demo-dashboard renderer
-test/       29 tests (layout, design, linter, QR, Worker, auth, end to end)
+test/       38 tests (layout, design, linter, QR, Worker, auth, event form, end to end)
 ```
 
 ## Roadmap

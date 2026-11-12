@@ -10,3 +10,15 @@ TZ = "America/Toronto"        # clicks are bucketed into days in this timezone
 binding = "DB"
 database_name = "eventpromoter"
 database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+
+# Generated assets (PNG / PDF) and saved event briefs live in R2.
+# Create the bucket once:  npx wrangler r2 bucket create eventpromoter-assets
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "eventpromoter-assets"
+
+# The brand fonts bundled with the Worker (worker/fonts) are imported as binary data.
+[[rules]]
+type = "Data"
+globs = ["**/*.ttf", "**/*.otf"]
+fallthrough = true
