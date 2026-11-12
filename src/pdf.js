@@ -1,4 +1,4 @@
-// Print PDF from a rendered PNG. Image-based (not vector): the poster is rendered at 200 dpi and
+// Print PDF from a rendered PNG. Image-based (not vector): the poster is rendered at 150 dpi and
 // placed on an 11 x 17 in page, which prints sharply but its text is not selectable.
 
 import { PDFDocument } from 'pdf-lib';

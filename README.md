@@ -75,7 +75,7 @@ Signed in to the dashboard, **New event** takes the same details as a brief (tit
 4. **Edit details** regenerates everything. Link codes never change, so printed posters keep working.
 
 Notes:
-- The print PDF is image-based: the poster is rendered at 200 dpi (2200 x 3400) and placed on an 11 x 17 in page. It prints sharply, but the text is not selectable. The CLI still writes a vector PDF.
+- The print PDF is image-based: the poster is rendered at 150 dpi (1650 x 2550) and placed on an 11 x 17 in page. It prints sharply, but the text is not selectable. The CLI still writes a vector PDF.
 - Rendering is CPU-heavy, so it needs the **Workers Paid** plan (the free plan caps CPU at 10 ms per request). Redirects stay cheap: the renderer is only loaded when an asset is generated.
 - Fonts (Poppins, Inter; SIL Open Font License) are subsetted to Latin and live in `worker/fonts/`.
 

@@ -82,7 +82,7 @@ test('create event: saves brief + 5 links, then assets render on first request a
   assert.ok(r2.m.has('events/winter-food-drive/ig-post.png'));
 
   const poster = await sharp(Buffer.from(await (await call('/files/winter-food-drive/poster.png')).arrayBuffer())).metadata();
-  assert.deepEqual([poster.width, poster.height], [2200, 3400]);
+  assert.deepEqual([poster.width, poster.height], [1650, 2550]);
 
   const pdfRes = await call('/files/winter-food-drive/poster-print.pdf?download=1');
   assert.equal(pdfRes.headers.get('content-type'), 'application/pdf');

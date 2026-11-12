@@ -16,14 +16,14 @@ export { ART_KINDS };
 export const FILES = [
   { name: 'ig-post.png', key: 'ig-post', label: 'Instagram post', type: 'image/png', size: '1080 × 1080' },
   { name: 'ig-story.png', key: 'ig-story', label: 'Instagram story', type: 'image/png', size: '1080 × 1920' },
-  { name: 'poster.png', key: 'poster', label: 'Poster', type: 'image/png', size: '2200 × 3400 (11 × 17 in at 200 dpi)' },
+  { name: 'poster.png', key: 'poster', label: 'Poster', type: 'image/png', size: '1650 × 2550 (11 × 17 in at 150 dpi)' },
   { name: 'poster-print.pdf', key: 'poster', label: 'Poster, print PDF', type: 'application/pdf', size: '11 × 17 in' },
   { name: 'slide.png', key: 'slide', label: 'Presentation slide', type: 'image/png', size: '1920 × 1080' },
   { name: 'banner.png', key: 'banner', label: 'Screen banner', type: 'image/png', size: '1920 × 480' },
 ];
 export const FILE_BY_NAME = Object.fromEntries(FILES.map((f) => [f.name, f]));
 /** PNG scale per format: the poster is rendered at 2x so the print PDF is sharp. */
-export const SCALE = { poster: 2 };
+export const SCALE = { poster: 1.5 };
 
 const FIELDS = {
   title: { max: 120, required: true, label: 'Title' },
