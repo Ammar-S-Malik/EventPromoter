@@ -60,7 +60,14 @@ for (const key of FORMAT_KEYS) {
   const issues = lint(asset, brief, brand);
   writeFileSync(join(outDir, `${key}.svg`), asset.svg);
   writeFileSync(join(outDir, `${key}.png`), await toPng(asset.svg, { scale }));
-  if (key === 'poster') writeFileSync(join(outDir, 'poster-print.pdf'), toPdf(asset.physicalSvg));
+  if (key === 'poster') {
+    try {
+      writeFileSync(join(outDir, 'poster-print.pdf'), toPdf(asset.physicalSvg));
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+      console.warn('! poster-print.pdf skipped: rsvg-convert is not installed (macOS: brew install librsvg). Everything else is unaffected.');
+    }
+  }
   report[key] = issues;
   const errs = issues.filter((i) => i.severity === 'error').length;
   const warns = issues.length - errs;
