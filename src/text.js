@@ -17,15 +17,21 @@ export function measure(text, { family, weight, size, tracking = 0 }) {
 }
 
 export function wrap(text, font, maxW) {
-  const words = text.trim().split(/\s+/).filter(Boolean);
+  // tokens carry the separator that joins them to the previous one: ' ' normally, '' after a hyphen,
+  // so "Non-perishables" can break as "Non-" / "perishables" when it is too wide for one line
+  const tokens = [];
+  for (const word of text.trim().split(/\s+/).filter(Boolean)) {
+    const parts = measure(word, font) > maxW ? word.split(/(?<=-)(?=.)/) : [word];
+    parts.forEach((p, i) => tokens.push({ p, sep: i ? '' : ' ' }));
+  }
   const lines = [];
   let cur = '';
-  for (const w of words) {
-    const t = cur ? `${cur} ${w}` : w;
+  for (const { p, sep } of tokens) {
+    const t = cur ? `${cur}${sep}${p}` : p;
     if (!cur || measure(t, font) <= maxW) cur = t;
     else {
       lines.push(cur);
-      cur = w;
+      cur = p;
     }
   }
   if (cur) lines.push(cur);

@@ -8,6 +8,12 @@
   "cta": "RSVP now",
   "link": "nsu.example/kickoff",
   "accent": "gold",
+  "theme": "light",
+  "highlights": [
+    "Free food",
+    "Live music",
+    "100+ clubs"
+  ],
   "destination": "https://nsu.example/kickoff",
   "qrCaption": "Scan to RSVP"
 }

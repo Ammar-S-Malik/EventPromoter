@@ -8,6 +8,12 @@
   "cta": "See schedule",
   "link": "nsu.example/mhaw",
   "accent": "teal",
+  "theme": "light",
+  "highlights": [
+    "Daily workshops",
+    "Therapy dogs",
+    "Quiet rooms"
+  ],
   "destination": "https://nsu.example/mhaw",
   "qrCaption": "Scan for the schedule"
 }
