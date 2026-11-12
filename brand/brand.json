@@ -1,0 +1,20 @@
+{
+  "name": "Northfield Student Union (sample brand, fictional)",
+  "colors": {
+    "ink": "#0F2A47",
+    "paper": "#FFFFFF",
+    "mist": "#E8EEF4",
+    "gold": "#FFB703",
+    "teal": "#2EC4B6",
+    "coral": "#FB6F5C"
+  },
+  "accents": ["gold", "teal", "coral"],
+  "fonts": {
+    "allowed": [
+      { "family": "Poppins", "weights": [400, 500, 700] },
+      { "family": "Inter", "weights": [400, 700] }
+    ]
+  },
+  "copy": { "titleMax": 60, "taglineMax": 100, "ctaMax": 28, "locationMax": 48 },
+  "contrast": { "normal": 4.5, "large": 3 }
+}

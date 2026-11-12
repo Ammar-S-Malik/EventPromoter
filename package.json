@@ -1,0 +1,14 @@
+{
+  "name": "eventpromoter",
+  "version": "0.1.0",
+  "description": "Turn one event brief into a matched, on-brand campaign (post, story, poster, slide, banner) with a built-in brand linter.",
+  "type": "module",
+  "scripts": {
+    "render": "node src/cli.js",
+    "samples": "for f in examples/kickoff examples/open-mic examples/wellness examples/food-drive; do node src/cli.js $f.json; done",
+    "test": "node --test"
+  },
+  "dependencies": { "sharp": "^0.35.0" },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}
