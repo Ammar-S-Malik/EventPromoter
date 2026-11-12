@@ -58,7 +58,7 @@ export const FORMATS = {
     safe: { top: 40, right: 60, bottom: 40, left: 60 }, minText: 24,
     p: {
       m: 80, panel: 1290, logo: 24, titleMax: 88, titleMin: 44, titleLines: 2, tagMax: 32, tagMin: 24,
-      value: 36, valueMin: 24, ctaH: 84, ctaSize: 28,
+      value: 36, valueMin: 24, ctaH: 120, ctaSize: 28,
     },
   },
 };

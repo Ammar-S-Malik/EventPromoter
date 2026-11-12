@@ -9,7 +9,7 @@
 
 import { Canvas, seeded } from './canvas.js';
 import { FORMATS } from './formats.js';
-import { measure } from './text.js';
+import { measure, fit } from './text.js';
 import { illustration, pickArt, pickIcon, icon, hexCluster, hexPath, logoMark } from './art.js';
 
 const SECOND = { gold: ['teal', 'coral'], teal: ['gold', 'coral'], coral: ['gold', 'teal'] };
@@ -225,13 +225,16 @@ function ctaBar(c, x, left, top, w, h, { fill, size = x.p.ctaSize } = {}) {
       c.text('cta', 'cta', link, { x: sx + one * 0.5, y: ty(ls), w: ax - r - 12 - (sx + one * 0.5), h: ls * 1.2 },
         { family: 'Poppins', weight: 500, max: ls, min: minT, maxLines: 1, lh: 1.2, fill: linkFill, bg: pill });
     } else {
-      // stacked: small action line over the link
-      const s1 = Math.max(minT, Math.round(h * 0.25)), s2 = Math.max(minT, Math.round(h * 0.28));
-      const y1 = top + (h - (s1 + s2) * 1.12) / 2;
+      // stacked: small action line over the link; a long link may wrap onto more lines when the bar is tall
+      const s1 = Math.max(minT, Math.round(h * 0.22)), s2 = Math.max(minT, Math.round(h * 0.28));
+      const room = h - s1 * 1.12 - h * 0.2;
+      const lines = Math.max(1, Math.floor(room / (minT * 1.12)));
+      const lf = fit(link, { family: 'Poppins', weight: 500 }, { w: inner, h: room }, { max: s2, min: minT, maxLines: lines, lh: 1.12 });
+      const y1 = top + (h - (s1 * 1.12 + lf.height)) / 2;
       c.text('cta-label', 'cta', action, { x: x0, y: y1, w: inner, h: s1 * 1.12 },
         { family: 'Poppins', weight: 700, max: s1, min: minT, maxLines: 1, lh: 1.12, fill: labelFill, bg: pill, tracking: 1 });
-      c.text('cta', 'cta', link, { x: x0, y: y1 + s1 * 1.12, w: inner, h: s2 * 1.12 },
-        { family: 'Poppins', weight: 500, max: s2, min: minT, maxLines: 1, lh: 1.12, fill: linkFill, bg: pill });
+      c.text('cta', 'cta', link, { x: x0, y: y1 + s1 * 1.12, w: inner, h: room },
+        { family: 'Poppins', weight: 500, max: s2, min: minT, maxLines: lines, lh: 1.12, fill: linkFill, bg: pill });
     }
   } else {
     c.text('cta', 'cta', action || link, { x: x0, y: ty(size), w: inner, h: size * 1.2 },
