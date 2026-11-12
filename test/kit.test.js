@@ -76,3 +76,31 @@ test('every example brief has a title, date and location', () => {
     for (const k of ['title', 'date', 'location']) assert.ok(b[k], `${f} missing ${k}`);
   }
 });
+
+test('design: weekday split, artwork and icon picking, hyphen wrapping', async () => {
+  const { splitDate } = await import('../src/templates.js');
+  const { pickArt, pickIcon } = await import('../src/art.js');
+  const { wrap } = await import('../src/text.js');
+  assert.deepEqual(splitDate('Mon, Sep 8'), { day: 'MON', rest: 'SEP 8' });
+  assert.equal(splitDate('Dec 1–12'), null);
+  assert.equal(pickArt(brief('kickoff')), 'party');
+  assert.equal(pickArt(brief('food-drive')), 'box');
+  assert.equal(pickArt({ category: 'Misc', title: 'Town hall' }), 'megaphone');
+  assert.equal(pickArt({ ...brief('kickoff'), art: 'books' }), 'books');
+  assert.equal(pickIcon('Therapy dogs'), 'paw');
+  const lines = wrap('NON-PERISHABLES', { family: 'Poppins', weight: 700, size: 30 }, 160);
+  assert.deepEqual(lines, ['NON-', 'PERISHABLES']);
+});
+
+test('every example brief is lint-clean in both themes, with and without highlights', () => {
+  for (const n of ['kickoff', 'food-drive', 'open-mic', 'wellness']) {
+    for (const theme of ['light', 'dark']) {
+      for (const highlights of [brief(n).highlights, []]) {
+        const b = { ...brief(n), theme, highlights };
+        for (const key of FORMAT_KEYS) {
+          assert.deepEqual(errors(lint(build(b, key, brand), b, brand)), [], `${n}/${theme}/${highlights.length}/${key}`);
+        }
+      }
+    }
+  }
+});

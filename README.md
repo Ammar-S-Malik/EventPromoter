@@ -38,13 +38,22 @@ node src/cli.js examples/bad-brief.json --no-fail          # watch the linter ca
 npm test
 ```
 
-A brief is plain JSON: `category, title, tagline, date, time, location, cta, link, accent` (`gold | teal | coral`), plus `destination` (the full https URL tracked links lead to) and optional `qrCaption`. Needs `rsvg-convert` for the PDF.
+A brief is plain JSON: `category, title, tagline, date, time, location, cta, link, accent` (`gold | teal | coral`), plus `destination` (the full https URL tracked links lead to) and these optional fields:
+
+| Field | What it does |
+|---|---|
+| `theme` | `"light"` (white page, navy type) or `"dark"` (navy page, illustration on a light hexagon badge). Default `light`. |
+| `highlights` | Up to three short selling points, e.g. `["Free food", "Live music", "100+ clubs"]`. Shown as an icon row on the story and poster; icons are picked from the words (food, music, dogs, prizes...) or set with `{ "text": "...", "icon": "gift" }`. |
+| `art` | Force an illustration: `megaphone, party, mic, heart, box, books`. Otherwise it is picked from the category/title (Welcome Week → balloons, Arts → mic, Wellness → heart, Food drive → donation box, Workshops → books, anything else → megaphone). |
+| `qrCaption` | Text under the QR code on the poster and slide. |
+
+Needs `rsvg-convert` for the PDF.
 
 ## How it works
 
 **Design side**
 - **Layout engine, zero runtime deps.** `src/text.js` measures text from real per-glyph advance widths (`tools/gen-metrics.py` extracts them from the brand fonts), so it can wrap and *fit* copy to a box exactly. No DOM, no canvas, no font loading.
-- **Templates → SVG.** Three layouts cover the five formats; artwork is generated deterministically from the title using brand colours only.
+- **Templates → SVG.** Three layouts cover the five formats. The visual language follows real student-union posts: heavy all-caps titles with a hand-painted highlighter swatch on the last line, flat outlined illustrations chosen from the event category, honeycomb hexagons, an icon row of highlights, and date / time / location cards with hard offset shadows (the date card leads with the weekday). All artwork (`src/art.js`) is vector, deterministic and drawn in brand colours only.
 - **Brand linter** (`src/lint.js`) inspects the exact geometry that was rendered: WCAG contrast, off-palette colours, non-brand typefaces, text overflow, platform safe zones (e.g. Instagram story UI), minimum legible size, copy length, and QR size/quiet-zone/safe-area.
 - **QR encoder from scratch** (`src/qr.js`): byte mode, error correction M, versions 1-10, all 8 masks. `npm run verify:qr` renders codes at 12 lengths and 3 print sizes and decodes them with OpenCV; the test suite also decodes the QR out of the finished poster and slide PNGs.
 
@@ -52,7 +61,7 @@ A brief is plain JSON: `category, title, tagline, date, time, location, cta, lin
 - `GET /r/:code` logs the click and 302-redirects to the destination with UTM parameters added (existing ones are never overwritten). QR scans are told apart from typed links.
 - Crawlers and link-preview fetches (Slack, WhatsApp, Facebook...) are detected and **excluded** from counts, but reported, so a pasted link doesn't inflate numbers.
 - **Privacy:** no IP address and no raw user-agent string is ever stored, only day, device class, country, referrer *host*, and QR-vs-link.
-- **Dashboard** (`/dashboard`): totals, clicks by channel, link-vs-QR per day, device / referrer / country, a table view of every chart, light and dark themes. Chart colours come from a palette validated for colour-blind separation and contrast.
+- **Admin dashboard** (`/dashboard`): sidebar app shell in the brand navy and gold, a campaign list with totals, and per campaign a KPI band (clicks with a 14-day sparkline and week-over-week change, QR share, top channel), clicks per day, a tracked-links table (short code, link vs QR, share of clicks per asset) and device / referrer / country breakdowns. Every chart has a table view; light and dark themes follow the system; responsive down to phone width; no external fonts, scripts or inline styles, so the strict CSP still holds. Chart colours come from a palette validated for colour-blind separation and contrast.
 - **Reporting:** `/api/campaigns/:id/report.md?days=7` returns a paste-ready weekly summary with change vs the previous period; `daily.csv` for spreadsheets.
 - **Security:** admin routes fail closed (no `ADMIN_TOKEN` = everything denied), the session cookie holds a hash rather than the token, constant-time comparison, strict CSP with per-response nonces, all dynamic output HTML-escaped.
 
@@ -76,12 +85,12 @@ The CLI saves each campaign's link codes in `links/<campaign>.json` and **reuses
 ## Project layout
 
 ```
-src/        layout engine, templates, linter, QR encoder, link helpers, stats queries, CLI
-worker/     Cloudflare Worker, D1 schema, dashboard renderer
+src/        layout engine, templates, artwork + icons, linter, QR encoder, link helpers, stats queries, CLI
+worker/     Cloudflare Worker, D1 schema, admin dashboard renderer
 brand/      brand.json (palette, fonts, copy limits)
 examples/   sample briefs (+ one deliberately off-brand)
 tools/      font-metrics generator, QR verifier, demo-dashboard renderer
-test/       27 tests (layout, linter, QR, Worker, auth, end to end)
+test/       29 tests (layout, design, linter, QR, Worker, auth, end to end)
 ```
 
 ## Roadmap

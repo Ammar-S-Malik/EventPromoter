@@ -8,6 +8,12 @@
   "cta": "Learn more",
   "link": "nsu.example/give",
   "accent": "teal",
+  "theme": "dark",
+  "highlights": [
+    "Non-perishables",
+    "Free coffee",
+    "Volunteer shifts"
+  ],
   "destination": "https://nsu.example/give",
   "qrCaption": "Scan to donate"
 }

@@ -8,6 +8,12 @@
   "cta": "Reserve a slot",
   "link": "nsu.example/mic",
   "accent": "coral",
+  "theme": "dark",
+  "highlights": [
+    "Comedy",
+    "Live music",
+    "Poetry"
+  ],
   "destination": "https://nsu.example/mic",
   "qrCaption": "Scan to sign up"
 }
