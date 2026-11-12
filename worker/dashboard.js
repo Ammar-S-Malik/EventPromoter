@@ -6,6 +6,8 @@
 
 import { esc } from '../src/canvas.js';
 import { LABEL_OF } from '../src/links.js';
+import { FORMATS } from '../src/formats.js';
+import { FILES, ACCENTS, ART_KINDS } from '../src/generate.js';
 
 const label = (c) => LABEL_OF[c] || c;
 const fmtDay = (d) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', timeZone: 'UTC' });
@@ -116,11 +118,50 @@ input:focus{outline:2px solid var(--focus);outline-offset:1px;border-color:trans
 .auth .btn{width:100%;justify-content:center;padding:11px;margin-top:14px;font-size:14px}
 .hint{color:var(--muted);font-size:12.5px;margin-top:16px}
 .err{display:flex;gap:8px;align-items:flex-start;background:rgba(194,65,12,.08);border:1px solid rgba(194,65,12,.3);color:var(--bad);padding:10px 12px;border-radius:8px;margin-bottom:16px;font-size:13px}
+
+/* event form */
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px}
+.fgrid .wide{grid-column:1/-1}
+.f{min-width:0}
+.f label,.f legend{display:block;font-weight:500;color:var(--ink);margin-bottom:6px;font-size:13px;padding:0}
+.f fieldset,fieldset.f{border:0;margin:0;padding:0;min-width:0}
+.opt{color:var(--muted);font-weight:400;margin-left:4px}
+.f .hint{margin:6px 0 0}
+select{font:inherit;width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--axis);background:var(--surface);color:var(--ink)}
+input[aria-invalid=true]{border-color:var(--bad)}
+.fe{color:var(--bad);font-size:12.5px;margin:6px 0 0}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{display:inline-flex;align-items:center;gap:8px;margin:0;padding:8px 14px;border:1px solid var(--axis);border-radius:8px;cursor:pointer;background:var(--surface);font-weight:500}
+.seg input:checked+label{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.seg input:focus-visible+label{outline:2px solid var(--focus);outline-offset:2px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(15,42,71,.35)}
+.sw-gold{background:#ffb703}.sw-teal{background:#2ec4b6}.sw-coral{background:#fb6f5c}.sw-light{background:#fff}.sw-dark{background:#0f2a47}
+.stack{display:grid;gap:16px;max-width:900px}
+.stack .panel{margin:0}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);margin-bottom:16px;max-width:900px}
+.banner.bad{border-color:rgba(194,65,12,.35);background:rgba(194,65,12,.07)}
+.banner.good{border-color:rgba(26,127,75,.35);background:rgba(26,127,75,.07)}
+.banner svg{flex:none;margin-top:2px}
+.banner ul{margin:6px 0 0;padding-left:18px}
+.banner b{color:var(--ink)}
+/* generated assets */
+.assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:16px;align-items:start}
+.asset{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.asset.wide{grid-column:1/-1}
+.thumb{background:var(--sunk);border-bottom:1px solid var(--line);display:grid;place-items:center;min-height:120px}
+.thumb img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain}
+.thumb .pdf{display:grid;place-items:center;gap:6px;padding:40px 16px;color:var(--muted);text-align:center}
+.thumb .pdf svg{color:var(--ink)}
+.ab{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px}
+.ab b{display:block;color:var(--ink);font-weight:600}
+.ab small{color:var(--muted);font-size:12px}
 @media (max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--line)}.cols{grid-template-columns:1fr}}
 @media (max-width:760px){.app{grid-template-columns:1fr;background:none}.side{position:static;height:auto;flex-direction:row;align-items:center;flex-wrap:wrap;padding:12px 16px;gap:8px}
 .brand{padding:0}.nav{flex-direction:row;flex-wrap:wrap}.nav .h,.nav a.sub{display:none}.nav a.on::before{display:none}.side .foot{margin:0 0 0 auto;border:0;padding:0}
 main{padding:18px 16px 40px}.auth{grid-template-columns:1fr}.auth .art{padding:28px}.auth .art ul,.auth .hex{display:none}
-.share svg,.spark{display:none}th,td{padding-left:14px;padding-right:14px}.ph{flex-wrap:wrap}.kpi .n{font-size:26px}}
+.share svg,.spark{display:none}.fgrid{grid-template-columns:1fr}th,td{padding-left:14px;padding-right:14px}.ph{flex-wrap:wrap}.kpi .n{font-size:26px}}
 `;
 
 const TIP_JS = `
@@ -143,6 +184,10 @@ const ICON = {
   out: I('<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"/>'),
   check: I('<path d="M20 6 9 17l-5-5"/>'),
   shield: I('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>'),
+  edit: I('<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/>'),
+  image: I('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/>'),
+  pdf: I('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>', 28),
   alert: I('<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/>'),
 };
 const CH_ICON = {
@@ -167,15 +212,19 @@ function doc(title, nonce, inner, { script = false } = {}) {
   );
 }
 
-function shell(title, nonce, body, { active = 'campaigns', campaign = null, script = false } = {}) {
+function shell(title, nonce, body, { active = 'stats', campaign = null, script = false } = {}) {
   const cid = campaign && encodeURIComponent(campaign.id);
+  const on = (k) => (active === k ? ' class="on" aria-current="page"' : '');
   const side =
     `<aside class="side"><a class="brand" href="/dashboard">${hexMark()}<span><b>EventPromoter</b><small>Campaign analytics</small></span></a>` +
     `<nav class="nav" aria-label="Main"><span class="h">Workspace</span>` +
-    `<a href="/dashboard"${campaign ? '' : ' class="on" aria-current="page"'}>${ICON.grid}Campaigns</a>` +
+    `<a href="/dashboard"${on('campaigns')}>${ICON.grid}Campaigns</a>` +
+    `<a href="/dashboard/new"${on('new')}>${ICON.plus}New event</a>` +
     (campaign
-      ? `<a class="sub on" href="/dashboard/${cid}" aria-current="page">${esc(campaign.name)}</a>` +
-        `<span class="h">This campaign</span>` +
+      ? `<span class="h">${esc(campaign.name)}</span>` +
+        `<a href="/dashboard/${cid}"${on('stats')}>${ICON.chart}Analytics</a>` +
+        `<a href="/dashboard/${cid}/assets"${on('assets')}>${ICON.image}Assets</a>` +
+        `<a href="/dashboard/${cid}/edit"${on('edit')}>${ICON.edit}Edit details</a>` +
         `<a href="/api/campaigns/${cid}/report.md">${ICON.doc}Weekly report</a>` +
         `<a href="/api/campaigns/${cid}/daily.csv">${ICON.download}Export CSV</a>`
       : '') +
@@ -284,7 +333,7 @@ export function renderDashboard(stats, { nonce }) {
 
   const body = `
 <div class="top"><nav class="crumbs" aria-label="Breadcrumb"><a href="/dashboard">Campaigns</a><span>/</span>${esc(c.name)}</nav>
-<div class="btns"><a class="btn" href="/api/campaigns/${cid}/report.md">${ICON.doc}Weekly report</a><a class="btn primary" href="/api/campaigns/${cid}/daily.csv">${ICON.download}Export CSV</a></div></div>
+<div class="btns"><a class="btn" href="/dashboard/${cid}/assets">${ICON.image}Assets</a><a class="btn" href="/api/campaigns/${cid}/report.md">${ICON.doc}Weekly report</a><a class="btn primary" href="/api/campaigns/${cid}/daily.csv">${ICON.download}Export CSV</a></div></div>
 <div class="head"><div><h1>${esc(c.name)}</h1>
 <div class="meta">${c.event_date ? `<span class="chip">${esc(c.event_date)}</span>` : ''}<span class="chip"><i class="dot"></i>${live} of ${channels.length} links receiving clicks</span><span class="chip">${num(t.bots)} bot / preview hits filtered</span></div></div></div>
 
@@ -319,7 +368,7 @@ export function renderIndex(campaigns, { nonce }) {
   const qr = campaigns.reduce((a, c) => a + c.qr, 0);
   const max = Math.max(1, ...campaigns.map((c) => c.clicks));
   const body = `
-<div class="top"><nav class="crumbs" aria-label="Breadcrumb">Campaigns</nav></div>
+<div class="top"><nav class="crumbs" aria-label="Breadcrumb">Campaigns</nav><div class="btns"><a class="btn primary" href="/dashboard/new">${ICON.plus}New event</a></div></div>
 <div class="head"><div><h1>Campaigns</h1><div class="meta">Every campaign generated with the CLI and registered with its links.sql</div></div></div>
 <section class="panel kpis" aria-label="Totals">
  <div class="kpi"><div class="l">Campaigns</div><div class="n">${num(campaigns.length)}</div><div class="s">Tracked in this workspace</div></div>
@@ -333,9 +382,9 @@ export function renderIndex(campaigns, { nonce }) {
         campaigns.map((c) => `<tr><td class="camp"><a href="/dashboard/${encodeURIComponent(c.id)}">${esc(c.name)}</a><small>${esc(c.id)}</small></td><td>${esc(c.event_date || '—')}</td>` +
           `<td class="r">${num(c.qr)}</td><td class="r"><b>${num(c.clicks)}</b></td><td class="r"><div class="share">${shareBar(c.clicks, max, c.qr)}</div></td></tr>`).join('') +
         `</tbody></table>`
-      : `<div class="empty"><b>No campaigns yet</b>Generate one with <code>node src/cli.js brief.json --base-url …</code>, then apply its links.sql with wrangler.</div>`) +
+      : `<div class="empty"><b>No campaigns yet</b>Create your first event to generate its post, story, poster, slide and banner, each with its own tracked link.<div class="actions"><a class="btn primary" href="/dashboard/new">New event</a></div></div>`) +
     `</section>`;
-  return shell('Campaigns · EventPromoter', nonce, body);
+  return shell('Campaigns · EventPromoter', nonce, body, { active: 'campaigns' });
 }
 
 export function renderLogin({ nonce, error = false }) {
@@ -356,4 +405,100 @@ export function renderLogin({ nonce, error = false }) {
  <p class="hint">The token is set with <code>wrangler secret put ADMIN_TOKEN</code>. Sessions last 30 days on this device.</p>
 </form></section></div>`;
   return doc('Sign in · EventPromoter', nonce, inner);
+}
+
+// ---------------------------------------------------------------- event form + assets
+
+const ART_LABEL = {
+  megaphone: 'Megaphone (general announcement)', party: 'Balloons and gift', mic: 'Microphone and music notes',
+  heart: 'Heart (health and wellness)', box: 'Donation box', books: 'Books and grad cap',
+};
+
+const field = (id, label, v, errors, { type = 'text', required = false, max = 100, hint = '', placeholder = '', wide = false } = {}) =>
+  `<div class="f${wide ? ' wide' : ''}"><label for="${id}">${label}${required ? '' : '<span class="opt">optional</span>'}</label>` +
+  `<input id="${id}" name="${id}" type="${type}" value="${esc(v[id] ?? '')}" maxlength="${max}"${required ? ' required' : ''}` +
+  `${placeholder ? ` placeholder="${esc(placeholder)}"` : ''}${errors[id] ? ` aria-invalid="true" aria-describedby="${id}-e"` : hint ? ` aria-describedby="${id}-h"` : ''}>` +
+  (hint ? `<p class="hint" id="${id}-h">${esc(hint)}</p>` : '') +
+  (errors[id] ? `<p class="fe" id="${id}-e">${esc(errors[id])}</p>` : '') + `</div>`;
+
+const seg = (name, label, options, current, error) =>
+  `<fieldset class="f"><legend>${label}</legend><div class="seg">` +
+  options.map(([val, text, sw]) => `<input type="radio" id="${name}-${val}" name="${name}" value="${val}"${(current || options[0][0]) === val ? ' checked' : ''}><label for="${name}-${val}"><i class="sw sw-${sw}"></i>${text}</label>`).join('') +
+  `</div>${error ? `<p class="fe">${esc(error)}</p>` : ''}</fieldset>`;
+
+function issueBanners(issues) {
+  if (!issues) return '';
+  const li = (i) => `<li>${i.format ? `<b>${esc(i.format)}:</b> ` : ''}${esc(i.message)}</li>`;
+  return (issues.errors.length
+    ? `<div class="banner bad" role="alert">${ICON.alert}<div><b>Fix these before the assets can be made</b><ul>${issues.errors.map(li).join('')}</ul></div></div>`
+    : '') +
+    (issues.warnings.length ? `<div class="banner">${ICON.alert}<div><b>Heads up</b><ul>${issues.warnings.map(li).join('')}</ul></div></div>` : '');
+}
+
+export function renderEventForm({ nonce, mode, campaign = null, values, errors = {}, issues = null, imported = false }) {
+  const v = values;
+  const edit = mode === 'edit';
+  const cid = campaign && encodeURIComponent(campaign.id);
+  const failed = Object.keys(errors).length > 0;
+  const body = `
+<div class="top"><nav class="crumbs" aria-label="Breadcrumb"><a href="/dashboard">Campaigns</a><span>/</span>${edit ? `<a href="/dashboard/${cid}">${esc(campaign.name)}</a><span>/</span>Edit details` : 'New event'}</nav></div>
+<div class="head"><div><h1>${edit ? 'Edit event details' : 'New event'}</h1>
+<div class="meta">${edit ? 'Saving regenerates the assets. Every short link and QR code keeps working.' : 'Fill in the details once. You get five matching assets and a tracked short link for each.'}</div></div></div>
+${imported ? `<div class="banner">${ICON.alert}<div>This event was created before the form existed, so only its title is filled in. Complete the details to generate its assets.</div></div>` : ''}
+${failed ? `<div class="banner bad" role="alert">${ICON.alert}<div><b>Check the highlighted fields</b></div></div>` : ''}
+${issueBanners(issues)}
+<form method="post" action="${edit ? `/dashboard/${cid}/edit` : '/dashboard/new'}" class="stack">
+<section class="panel"><div class="ph"><div><h2>Event</h2></div></div><div class="pb"><div class="fgrid">
+ ${field('title', 'Title', v, errors, { required: true, max: 120, wide: true, hint: 'Shown large on every asset. The brand limit is 60 characters.' })}
+ ${field('category', 'Category', v, errors, { required: true, max: 40, placeholder: 'Welcome Week', hint: 'Shown as the label above the title. Also picks the illustration.' })}
+ ${field('tagline', 'Tagline', v, errors, { max: 200, hint: 'One short line under the title.' })}
+ ${field('date', 'Date', v, errors, { required: true, max: 40, placeholder: 'Mon, Sep 8', hint: 'Start with the weekday to get the big day card.' })}
+ ${field('time', 'Time', v, errors, { max: 40, placeholder: '12–4 PM' })}
+ ${field('location', 'Location', v, errors, { required: true, max: 100, wide: true })}
+</div></div></section>
+<section class="panel"><div class="ph"><div><h2>Call to action</h2></div></div><div class="pb"><div class="fgrid">
+ ${field('cta', 'Button text', v, errors, { required: true, max: 60, placeholder: 'RSVP now', hint: 'The brand limit is 28 characters.' })}
+ ${field('qrCaption', 'QR code caption', v, errors, { max: 60, placeholder: 'Scan to RSVP', hint: 'Shown under the QR code on the poster and slide.' })}
+ ${field('destination', 'Destination link', v, errors, { type: 'url', required: true, max: 500, wide: true, placeholder: 'https://example.org/rsvp', hint: 'Where the short links and QR codes lead. UTM tags are added for you.' })}
+</div></div></section>
+<section class="panel"><div class="ph"><div><h2>Look</h2></div></div><div class="pb"><div class="fgrid">
+ ${seg('accent', 'Main colour', ACCENTS.map((a) => [a, a[0].toUpperCase() + a.slice(1), a]), v.accent, errors.accent)}
+ ${seg('theme', 'Background', [['light', 'Light', 'light'], ['dark', 'Dark', 'dark']], v.theme, errors.theme)}
+ <div class="f wide"><label for="art">Illustration<span class="opt">optional</span></label><select id="art" name="art"><option value="">Automatic, from the category</option>${ART_KINDS.map((k) => `<option value="${k}"${v.art === k ? ' selected' : ''}>${esc(ART_LABEL[k] || k)}</option>`).join('')}</select></div>
+ ${field('highlight1', 'Highlight 1', v, errors, { max: 40, placeholder: 'Free food' })}
+ ${field('highlight2', 'Highlight 2', v, errors, { max: 40, placeholder: 'Live music' })}
+ ${field('highlight3', 'Highlight 3', v, errors, { max: 40, placeholder: '100+ clubs', hint: 'Short selling points, shown with icons on the story and poster.' })}
+ ${errors.highlights ? `<p class="fe wide">${esc(errors.highlights)}</p>` : ''}
+</div></div></section>
+<div class="actions"><button class="btn primary" type="submit">${edit ? 'Save and regenerate' : 'Create event and assets'}</button><a class="btn" href="${edit ? `/dashboard/${cid}/assets` : '/dashboard'}">Cancel</a></div>
+<p class="hint">Pictures are drawn the first time you open them, so the first view takes a few seconds.</p>
+</form>`;
+  return shell(`${edit ? 'Edit' : 'New event'} · EventPromoter`, nonce, body, { active: edit ? 'edit' : 'new', campaign: edit ? campaign : null });
+}
+
+export function renderAssets({ nonce, campaign, brief, issues, links, version }) {
+  const cid = encodeURIComponent(campaign.id);
+  const v = `v=${version}`;
+  const card = (f) => {
+    const url = `/files/${cid}/${f.name}`;
+    const fmt = FORMATS[f.key];
+    const thumb = f.type === 'application/pdf'
+      ? `<div class="thumb"><div class="pdf">${ICON.pdf}<span>Print-ready PDF<br>11 × 17 in, from the poster</span></div></div>`
+      : `<div class="thumb"><a href="${url}?${v}" aria-label="Open ${esc(f.label)} full size"><img src="${url}?${v}" alt="${esc(f.label)} preview" width="${fmt.w}" height="${fmt.h}" loading="lazy"></a></div>`;
+    return `<article class="asset${f.key === 'banner' ? ' wide' : ''}">${thumb}<div class="ab"><div><b>${esc(f.label)}</b><small>${esc(f.size)}</small></div>` +
+      `<a class="btn" href="${url}?download=1&amp;${v}">${ICON.download}Download</a></div></article>`;
+  };
+  const body = `
+<div class="top"><nav class="crumbs" aria-label="Breadcrumb"><a href="/dashboard">Campaigns</a><span>/</span><a href="/dashboard/${cid}">${esc(campaign.name)}</a><span>/</span>Assets</nav>
+<div class="btns"><a class="btn" href="/dashboard/${cid}/edit">${ICON.edit}Edit details</a><a class="btn primary" href="/dashboard/${cid}">${ICON.chart}View analytics</a></div></div>
+<div class="head"><div><h1>${esc(campaign.name)}</h1><div class="meta">${campaign.event_date ? `<span class="chip">${esc(campaign.event_date)}</span>` : ''}<span class="chip">${esc(brief.location || '')}</span></div></div></div>
+${issues.errors.length || issues.warnings.length ? issueBanners(issues) : `<div class="banner good">${ICON.check}<div><b>All brand checks passed</b> for every asset.</div></div>`}
+<div class="assets">${FILES.map(card).join('')}</div>
+<section class="panel"><div class="ph"><div><h2>Tracked links</h2><p>Each asset points at its own short link, so analytics show which one worked</p></div></div><div class="pb"></div>
+<div class="tw"><table><thead><tr><th>Asset</th><th>Short link</th></tr></thead><tbody>${links.map((l) => `<tr><td>${esc(l.label)}</td><td><code>${esc(l.url)}</code></td></tr>`).join('')}</tbody></table></div></section>`;
+  return shell(`Assets · ${campaign.name} · EventPromoter`, nonce, body, { active: 'assets', campaign });
+}
+
+export function renderMessage({ nonce, title, body }) {
+  return shell(`${title} · EventPromoter`, nonce, `<div class="head"><div><h1>${esc(title)}</h1><div class="meta">${esc(body)}</div></div></div><div class="actions"><a class="btn" href="/dashboard">Back to campaigns</a></div>`, { active: 'campaigns' });
 }

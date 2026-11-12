@@ -4,6 +4,7 @@
 //   GET  /dashboard[/:id]    analytics (requires login)
 //   GET  /api/campaigns/:id/{stats,daily.csv,report.md}   (requires login or Bearer token)
 //   POST /login              exchange ADMIN_TOKEN for a session cookie
+//   /dashboard/new, /dashboard/:id/{edit,assets}, /files/:id/:name   create events and download assets (worker/events.js)
 //
 // Fails closed: without ADMIN_TOKEN configured, every admin route returns 401.
 // Set DEV=1 only for local development to skip auth.
@@ -12,6 +13,14 @@ import { classifyUA, referrerHost, localDay, withUtm, MEDIUM_OF } from '../src/l
 import { campaignStats, listCampaigns } from '../src/stats.js';
 import { weekReport, lastNDays, previousWindow, dailyCsv } from '../src/report.js';
 import { renderDashboard, renderIndex, renderLogin } from './dashboard.js';
+import { handleEvents } from './events.js';
+import brand from './brand.js';
+
+// Rendering (resvg wasm, fonts, pdf-lib) is heavy, so it is only loaded when an asset is generated.
+const lazyRender = {
+  png: async (...a) => (await import('./render.js')).png(...a),
+  pdf: async (...a) => (await import('./render.js')).pdf(...a),
+};
 
 const enc = new TextEncoder();
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -32,7 +41,7 @@ function html(body, n, status = 200, extra = {}) {
       'cache-control': 'no-store',
       'x-content-type-options': 'nosniff',
       'referrer-policy': 'no-referrer',
-      'content-security-policy': `default-src 'none'; style-src 'nonce-${n}'; script-src 'nonce-${n}'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
+      'content-security-policy': `default-src 'none'; img-src 'self'; style-src 'nonce-${n}'; script-src 'nonce-${n}'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
       ...extra,
     },
   });
@@ -75,7 +84,8 @@ async function handleRedirect(req, env, ctx, code) {
   return new Response(null, { status: 302, headers: { location: dest, 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' } });
 }
 
-export default {
+export function createWorker({ render = lazyRender } = {}) {
+  return {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
@@ -103,7 +113,7 @@ export default {
       return new Response(null, { status: 303, headers: { location: '/login', 'set-cookie': 'ep_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0' } });
     }
 
-    const admin = path === '/' || path.startsWith('/dashboard') || path.startsWith('/api/');
+    const admin = path === '/' || path.startsWith('/dashboard') || path.startsWith('/api/') || path.startsWith('/files/');
     if (!admin) return text('Not found', 'text/plain', 404);
     if (!(await isAdmin(req, env))) {
       if (path.startsWith('/api/')) return text('Unauthorized', 'text/plain', 401);
@@ -112,6 +122,9 @@ export default {
 
     const tz = env.TZ || 'UTC';
     const today = localDay(new Date(), tz);
+
+    const ev = await handleEvents({ req, url, path, env, n, render, brand, html, text });
+    if (ev) return ev;
 
     if (path === '/' || path === '/dashboard') return html(renderIndex(await listCampaigns(env.DB), { nonce: n }), n);
 
@@ -135,4 +148,7 @@ export default {
 
     return text('Not found', 'text/plain', 404);
   },
-};
+  };
+}
+
+export default createWorker();
