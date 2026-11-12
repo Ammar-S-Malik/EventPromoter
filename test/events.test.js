@@ -178,7 +178,7 @@ test('admin pages keep the strict CSP and escape what users typed', async () => 
 });
 
 test('a real workers.dev address fits in every format, and too-long text is named in the error', () => {
-  for (const origin of ['https://eventpromoter.am0016408.workers.dev', 'https://eventpromoter.some-account-name.workers.dev']) {
+  for (const origin of ['https://eventpromoter.am0016408.workers.dev', 'https://eventpromoter.my-club.workers.dev']) {
     assert.deepEqual(summariseIssues(preflight(parseBrief(GOOD).brief, brand, origin)).errors, [], origin);
   }
   const tooLong = summariseIssues(preflight(parseBrief(GOOD).brief, brand, `https://${'a'.repeat(30)}.${'b'.repeat(40)}.workers.dev`)).errors;
