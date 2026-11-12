@@ -1,0 +1,12 @@
+name = "eventpromoter"
+main = "index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+TZ = "America/Toronto"        # clicks are bucketed into days in this timezone
+# ADMIN_TOKEN is a secret:  wrangler secret put ADMIN_TOKEN   (the dashboard fails closed without it)
+
+[[d1_databases]]
+binding = "DB"
+database_name = "eventpromoter"
+database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"

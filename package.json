@@ -6,9 +6,20 @@
   "scripts": {
     "render": "node src/cli.js",
     "samples": "for f in examples/kickoff examples/open-mic examples/wellness examples/food-drive; do node src/cli.js $f.json; done",
-    "test": "node --test"
+    "test": "node --test",
+    "verify:qr": "node tools/verify-qr.mjs",
+    "demo:dashboard": "node tools/demo-dashboard.mjs",
+    "dev:worker": "wrangler dev --config worker/wrangler.toml --var DEV:1",
+    "deploy:worker": "wrangler deploy --config worker/wrangler.toml"
   },
-  "dependencies": { "sharp": "^0.35.0" },
-  "engines": { "node": ">=20" },
-  "license": "MIT"
+  "dependencies": {
+    "sharp": "^0.35.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
 }

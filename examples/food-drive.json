@@ -1,1 +1,13 @@
-{"category":"Community","title":"Winter Food Drive","tagline":"Bring a non-perishable item, win a free coffee.","date":"Dec 1–12","time":"9 AM–5 PM","location":"Drop-off at any campus entrance","cta":"Learn more","link":"nsu.example/give","accent":"teal"}
+{
+  "category": "Community",
+  "title": "Winter Food Drive",
+  "tagline": "Bring a non-perishable item, win a free coffee.",
+  "date": "Dec 1–12",
+  "time": "9 AM–5 PM",
+  "location": "Drop-off at any campus entrance",
+  "cta": "Learn more",
+  "link": "nsu.example/give",
+  "accent": "teal",
+  "destination": "https://nsu.example/give",
+  "qrCaption": "Scan to donate"
+}

@@ -24,6 +24,14 @@ export function lint(asset, brief, brand) {
   }
 
   for (const el of elements) {
+    if (el.kind === 'qr') {
+      const sz = fmt.safe, bx = el.box;
+      if (bx.x < sz.left || bx.y < sz.top || bx.x + bx.w > fmt.w - sz.right || bx.y + bx.h > fmt.h - sz.bottom)
+        add('safe-zone', 'error', el.id, 'QR code leaves the safe area.');
+      if (bx.w < fmt.w * 0.1) add('qr-size', 'error', el.id, `QR code is ${Math.round(bx.w)}px wide, under 10% of the page width; it may not scan from a distance.`);
+      if (el.cell < 4) add('qr-size', 'warn', el.id, `QR modules are only ${el.cell}px; shorten the link or enlarge the code.`);
+      continue;
+    }
     // --- fonts
     const fam = allowedFonts.find((f) => f.family.toLowerCase() === el.family.toLowerCase());
     if (!fam) add('font', 'error', el.id, `Typeface "${el.family}" is not a brand font.`);

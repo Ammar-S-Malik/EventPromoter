@@ -3,6 +3,7 @@
 
 import { fit } from './text.js';
 import { normHex } from './color.js';
+import { qrEncode, qrSvg } from './qr.js';
 
 export const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -23,7 +24,8 @@ export function seeded(str) {
 }
 
 export class Canvas {
-  constructor(fmt, brand, brief) {
+  constructor(fmt, brand, brief, track = null) {
+    this.track = track; // { url, display } when short-link tracking is on
     this.fmt = fmt;
     this.brand = brand;
     this.brief = brief;
@@ -82,11 +84,13 @@ export class Canvas {
     const tspans = f.lines
       .map((line, i) => {
         const y = box.y + (i + 0.5) * f.size * lh + f.size * 0.35;
-        return `<tspan x="${box.x}" y="${y.toFixed(1)}">${esc(line)}</tspan>`;
+        const x = s.align === 'center' ? box.x + box.w / 2 : box.x;
+        return `<tspan x="${x}" y="${y.toFixed(1)}">${esc(line)}</tspan>`;
       })
       .join('');
     this.parts.push(
       `<text font-family="${esc(family)}, sans-serif" font-weight="${weight}" font-size="${f.size}" fill="${fill}"` +
+        `${s.align === 'center' ? ' text-anchor="middle"' : ''}` +
         `${tracking ? ` letter-spacing="${tracking}"` : ''}>${tspans}</text>`
     );
     this.elements.push({
@@ -104,6 +108,23 @@ export class Canvas {
       box: { x: box.x, y: box.y, w: box.w, h: f.height },
     });
     return f.height;
+  }
+
+  /**
+   * Place a QR code (dark modules on a light plate with the mandatory 4-module quiet zone).
+   * Anchor with { right, cy } or { cx, cy }. Records the plate geometry so the linter can check it.
+   */
+  qr(id, url, { right, cx, cy, target }) {
+    const { size: n } = qrEncode(url);
+    const cell = Math.max(1, Math.floor(target / (n + 8)));
+    const side = cell * (n + 8);
+    const x = right !== undefined ? right - side : cx - side / 2;
+    const y = cy - side / 2;
+    const q = qrSvg(url, { x, y, target, dark: this.color('ink'), light: this.color('paper'), radius: 14 });
+    this.parts.push(q.svg);
+    this.usedColors.add(this.color('ink')); this.usedColors.add(this.color('paper'));
+    this.elements.push({ id, kind: 'qr', cell, modules: n, box: { x, y, w: side, h: side } });
+    return { x, y, side };
   }
 
   /** Abstract artwork derived from the title: circles + bars in brand colours only. */
