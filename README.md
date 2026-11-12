@@ -14,6 +14,20 @@ Concept project, built around a fictional sample brand ("Northfield Student Unio
 ### Analytics dashboard
 ![dashboard](docs/dashboard.png)
 
+## How I'd use this at SSF
+
+*A concept project: not affiliated with SSF, and the sample brand is fictional.*
+
+Student-union marketing means announcing the same event in several places, each with its own size, brand rules and way of measuring results. EventPromoter is my take on handling the repetitive part of that quickly, so more time goes to the creative work.
+
+- **One brief, five matching assets.** Event details go in once. The Instagram post, story, poster, slide and screen banner come out consistent, so nobody resizes and retypes the same text.
+- **Brand checks before anything goes out.** The linter flags low contrast, off-palette colours, wrong fonts, text running off the edge, and text hidden under Instagram's story overlays, so reviewers can spend their time on ideas instead of catching mistakes.
+- **Know which channel worked.** Every asset has its own short link, and the poster and slide also carry a QR code. Clicks and scans show up by channel on the dashboard, next to whatever the social platforms report.
+- **Reports that paste straight in.** A weekly summary (totals, top channel, change from the previous period) is one request away, ready for the manager's update.
+- **A companion, not a replacement.** Creative design would still happen in tools like Canva or Adobe, and scheduling in a tool like Hootsuite. This covers the layout, consistency and tracking work around them.
+
+**Not built yet:** post scheduling, a content calendar and a post-event survey (see the roadmap below).
+
 ## Quick start
 
 ```bash
