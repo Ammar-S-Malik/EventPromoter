@@ -18,10 +18,10 @@ export function measure(text, { family, weight, size, tracking = 0 }) {
 
 export function wrap(text, font, maxW) {
   // tokens carry the separator that joins them to the previous one: ' ' normally, '' after a hyphen,
-  // so "Non-perishables" can break as "Non-" / "perishables" when it is too wide for one line
+  // so "Non-perishables" can break as "Non-" / "perishables", and a long link after a "/" or ".", when it is too wide for one line
   const tokens = [];
   for (const word of text.trim().split(/\s+/).filter(Boolean)) {
-    const parts = measure(word, font) > maxW ? word.split(/(?<=-)(?=.)/) : [word];
+    const parts = measure(word, font) > maxW ? word.split(/(?<=[-/.])(?=.)/) : [word];
     parts.forEach((p, i) => tokens.push({ p, sep: i ? '' : ' ' }));
   }
   const lines = [];

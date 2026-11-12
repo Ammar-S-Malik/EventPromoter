@@ -4,6 +4,16 @@
 import { contrast, normHex } from './color.js';
 import { knownFont } from './text.js';
 
+// Plain-language names for the text slots, so a message says what to shorten.
+const NAME = {
+  title: 'The title', 'title-mark': 'The last line of the title', tagline: 'The tagline', eyebrow: 'The category',
+  cta: 'The short link', 'cta-label': 'The button text', 'where-value': 'The location', 'info-date': 'The date',
+  'info-time': 'The time', 'date-value': 'The date', 'date-day': 'The weekday', 'date-label': 'The Date label',
+  'time-value': 'The time', 'time-label': 'The Time label', 'where-label': 'The Where label', 'qr-caption': 'The QR caption',
+  hashtag: 'The hashtag', 'logo-1': 'The organisation name', 'logo-2': 'The organisation name',
+};
+const nameOf = (id) => NAME[id] || (/^highlight-(\d)$/.test(id) ? `Highlight ${id.slice(-1)}` : `The text "${id}"`);
+
 export function lint(asset, brief, brand) {
   const issues = [];
   const add = (rule, severity, element, message) => issues.push({ rule, severity, element, message });
@@ -45,7 +55,11 @@ export function lint(asset, brief, brand) {
     if (ratio < need) add('contrast', 'error', el.id, `Contrast ${ratio.toFixed(2)}:1 is below ${need}:1 (${el.fill} on ${el.bg}).`);
 
     // --- overflow: text that did not fit its box even at the minimum size
-    if (el.overflow) add('overflow', 'error', el.id, `Text does not fit its area at the minimum size (${el.size}px). Shorten the copy.`);
+    if (el.overflow) {
+      add('overflow', 'error', el.id, el.id === 'cta'
+        ? `The short link (${el.text.length} characters) is too long to fit here. Use a shorter Worker address, for example a custom domain.`
+        : `${nameOf(el.id)} does not fit its area at the smallest allowed size (${el.size}px). Shorten it.`);
+    }
 
     // --- safe zone
     const s = fmt.safe;

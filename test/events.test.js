@@ -176,3 +176,13 @@ test('admin pages keep the strict CSP and escape what users typed', async () => 
   assert.match(csp, /img-src 'self'/);
   assert.ok(!(await form.text()).includes(' style="'));
 });
+
+test('a real workers.dev address fits in every format, and too-long text is named in the error', () => {
+  for (const origin of ['https://eventpromoter.am0016408.workers.dev', 'https://eventpromoter.some-account-name.workers.dev']) {
+    assert.deepEqual(summariseIssues(preflight(parseBrief(GOOD).brief, brand, origin)).errors, [], origin);
+  }
+  const tooLong = summariseIssues(preflight(parseBrief(GOOD).brief, brand, `https://${'a'.repeat(30)}.${'b'.repeat(40)}.workers.dev`)).errors;
+  assert.ok(tooLong.some((e) => e.element === 'cta' && /short link/i.test(e.message) && /shorter/i.test(e.message)));
+  const long = summariseIssues(preflight(parseBrief({ ...GOOD, location: 'word '.repeat(20).trim() }).brief, brand)).errors;
+  assert.ok(long.some((e) => /location/i.test(e.message)), JSON.stringify(long));
+});
